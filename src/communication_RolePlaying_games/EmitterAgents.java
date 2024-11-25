@@ -19,8 +19,7 @@ public class EmitterAgents extends Agent{
 	
 	protected void activate() {
 		getLogger().setLevel(Level.FINEST);
-
-		createGroup("communication", "GroupTest");// Create the group GroupTest in the community communication.
+		createGroupIfAbsent("communication", "GroupTest");// Create the group GroupTest in the community communication.
 		requestRole("communication", "GroupTest", "Emetteur");
 		pause(500);
 	    }
@@ -30,24 +29,29 @@ public class EmitterAgents extends Agent{
 	    int messageCount = random.nextInt(10) + 1;
 		AgentAddress other = null;
 		// Until we have an agent (in the group GroupTest in the community communication) having the role RoleTest2.
-		while (other == null) {
-		    
-		    other = getAgentWithRole("communication", "GroupTest", "counter");
-		    pause(1000);
-		}
-		getLogger().info("\n\tJ'ai trouvé un agent compteur !!\n" + other + "\n\n");
-		pause(1000);
+
+
+		//pause(1000);
 		// Envoyer un certain nombre de messages à l'agent compteur trouvé
         for (int i = 0; i < messageCount; i++) {
             pause(random.nextInt(2000)); // Pause aléatoire avant chaque envoi
-
+            
+            int trialInt = 0;
+    		while (other == null && trialInt<60 ) {
+    		    other = getAgentWithRole("communication", "GroupTest", "counter");
+    		    pause(100);
+    		    trialInt++;
+    		}
+    		getLogger().info("\n\tJ'ai trouvé un agent compteur !!\n" + other + "\n\n");
             // Envoi d'un message à l'agent compteur
             sendMessage(other, new Message());
-            getLogger().info("Message envoyé à l'agent compteur.");
+            getLogger().info("Message envoyé à l'agent compteur."+other);
         }
         //waiting for a response
-		while (nextMessage() != null)
-		    pause(6000);
+		//while (nextMessage() != null)
+		   // pause(6000);
+	    
+	    
 	    }
 
 	    /*
@@ -65,11 +69,7 @@ public class EmitterAgents extends Agent{
 	     * @param argss
 	     *            Running Agent1 will launch 2 instances of both Agent1 and Agent2. They will send themselves 1 message.
 	     */
-	    @SuppressWarnings("unused")
-	    public static void main(String[] argss) {
-	    	// Lancer 2 instances de `EmitterAgents` et 2 de `CounterAgents`
-	        new Madkit("--launchAgents", EmitterAgents.class.getName() + ",true,1;",
-	        		CounterAgents.class.getName() + ",true,1;",
-	        		ControllerAgents.class.getName() + ",true,1;");	    }
+	   
+	    
 
 }
